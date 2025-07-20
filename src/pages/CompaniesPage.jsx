@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getCompanies } from '../services/companyService.js';
 import Table from '../components/common/Table.jsx';
 import Spinner from '../components/common/Spinner.jsx';
@@ -78,7 +79,9 @@ const CompaniesPage = () => {
       header: 'Acciones',
       cell: (row) => (
         <div className="flex space-x-2">
-          <Button variant="secondary" onClick={() => console.log('Ver empresa:', row.id)} className="py-1 px-2 text-xs">Ver</Button>
+          <Link to={`/empresas/${row.id}`} state={{ company: row }}>
+            <Button variant="secondary" className="py-1 px-2 text-xs">Ver</Button>
+          </Link>
           <Button variant="secondary" onClick={() => handleOpenEditModal(row)} className="py-1 px-2 text-xs">Editar</Button>
         </div>
       ),

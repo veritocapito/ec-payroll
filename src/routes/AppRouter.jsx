@@ -1,8 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from '../components/layout/MainLayout.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
+import NotFoundPage from '../pages/NotFoundPage.jsx';
 import DashboardPage from '../pages/DashboardPage.jsx';
 import CompaniesPage from '../pages/CompaniesPage.jsx';
+import CompanyDetailPage from '../pages/CompanyDetailPage.jsx';
 
 const AppRouter = () => {
   return (
@@ -10,15 +12,13 @@ const AppRouter = () => {
       {/* Ruta para el Login, no usa el layout principal */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Rutas que SÍ usan el layout principal (Navbar, Sidebar, etc.) */}
+      {/* Rutas que usan el layout principal */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<DashboardPage />} />
         <Route path="empresas" element={<CompaniesPage />} />
-        {/* Aquí agregarás más rutas en el futuro (ej: concepts, reports) */}
+        <Route path="empresas/:companyId" element={<CompanyDetailPage />} />
       </Route>
-
-      {/* Podrías agregar una ruta para "Página no encontrada" */}
-      {/* <Route path="*" element={<NotFoundPage />} /> */}
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };
