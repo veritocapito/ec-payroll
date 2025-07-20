@@ -79,7 +79,7 @@ const CompaniesPage = () => {
       header: 'Acciones',
       cell: (row) => (
         <div className="flex space-x-2">
-          <Link to={`/empresas/${row.id}`} state={{ company: row }}>
+          <Link to={`/companies/${row.id}`} state={{ company: row }}>
             <Button variant="secondary" className="py-1 px-2 text-xs">Ver</Button>
           </Link>
           <Button variant="secondary" onClick={() => handleOpenEditModal(row)} className="py-1 px-2 text-xs">Editar</Button>

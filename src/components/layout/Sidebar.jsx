@@ -34,7 +34,7 @@ const Sidebar = () => {
           </li>
           <li>
             <NavLink
-              to="/empresas"
+              to="/companies"
               className={({ isActive }) => `${baseLinkStyle} ${isActive ? activeLinkStyle : ''}`}
             >
               <span className="ml-3">Empresas</span>
