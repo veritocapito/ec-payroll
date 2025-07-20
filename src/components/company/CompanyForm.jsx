@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import Select from '../common/Select';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-const CompanyForm = ({ onClose, onAddCompany }) => {
-  // Estado inicial para todos los campos del formulario
+const CompanyForm = ({ onClose, onSave, initialData = null, onToggleStatus }) => {
   const [formData, setFormData] = useState({
     razonSocial: '',
     cuit: '',
@@ -28,27 +27,70 @@ const CompanyForm = ({ onClose, onAddCompany }) => {
     celular: '',
   });
 
-  // Función genérica que actualiza el estado para la mayoría de los campos
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    } else {
+      setFormData({
+        razonSocial: '', cuit: '', codigo: '', cuitRep: '', claveArca: '',
+        calle: '', numero: '', piso: '', dpto: '', cp: '', provincia: '', localidad: '', pais: '',
+        convenios: [], medioDePago: '',
+        contactName: '', contactEmail: '', celular: ''
+      });
+    }
+  }, [initialData]);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const handleTogglePassword = () => setShowPassword(!showPassword);
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Función específica para el select múltiple de convenios
   const handleConveniosChange = (e) => {
     const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
     setFormData(prev => ({ ...prev, convenios: selectedOptions }));
   };
-
-  // Al enviar, pasamos los datos al componente padre y cerramos el modal
+  
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAddCompany({ id: Date.now(), ...formData }); // Añadimos un ID único
+    onSave(formData);
     onClose();
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleTogglePassword = () => setShowPassword(!showPassword);
+  const handleToggleClick = () => {
+    if (onToggleStatus) {
+      onToggleStatus();
+    }
+  };
+  
+  const provinciasOptions = [
+    { value: 'Buenos Aires', text: 'Buenos Aires' },
+    { value: 'CABA', text: 'Ciudad Autónoma de Buenos Aires' },
+    { value: 'Catamarca', text: 'Catamarca' },
+    { value: 'Chaco', text: 'Chaco' },
+    { value: 'Chubut', text: 'Chubut' },
+    { value: 'Córdoba', text: 'Córdoba' },
+    { value: 'Corrientes', text: 'Corrientes' },
+    { value: 'Entre Ríos', text: 'Entre Ríos' },
+    { value: 'Formosa', text: 'Formosa' },
+    { value: 'Jujuy', text: 'Jujuy' },
+    { value: 'La Pampa', text: 'La Pampa' },
+    { value: 'La Rioja', text: 'La Rioja' },
+    { value: 'Mendoza', text: 'Mendoza' },
+    { value: 'Misiones', text: 'Misiones' },
+    { value: 'Neuquén', text: 'Neuquén' },
+    { value: 'Río Negro', text: 'Río Negro' },
+    { value: 'Salta', text: 'Salta' },
+    { value: 'San Juan', text: 'San Juan' },
+    { value: 'San Luis', text: 'San Luis' },
+    { value: 'Santa Cruz', text: 'Santa Cruz' },
+    { value: 'Santa Fe', text: 'Santa Fe' },
+    { value: 'Santiago del Estero', text: 'Santiago del Estero' },
+    { value: 'Tierra del Fuego', text: 'Tierra del Fuego, Antártida e Islas del Atlántico Sur' },
+    { value: 'Tucumán', text: 'Tucumán' },
+  ];
 
   const conveniosOptions = [
     { value: '108/75', text: 'CCT 108/75 Inst.Med.S/Internacion' },
@@ -85,7 +127,6 @@ const CompanyForm = ({ onClose, onAddCompany }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       
-      {/* --- DATOS PRINCIPALES --- */}
       <h3 className="text-lg font-sans font-semibold text-primary border-b mb-2">Datos Principales</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
         <Input label="Razón Social" id="razonSocial" name="razonSocial" value={formData.razonSocial} onChange={handleChange} required />
@@ -94,20 +135,19 @@ const CompanyForm = ({ onClose, onAddCompany }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
         <Input label="Código" id="codigo" name="codigo" value={formData.codigo} onChange={handleChange} />
         <Input label="CUIT Representante ARCA" id="cuitRep" name="cuitRep" value={formData.cuitRep} onChange={handleChange} required />
-       <Input
+        <Input
           label="Clave Fiscal ARCA"
           id="claveArca"
           name="claveArca"
           value={formData.claveArca}
           onChange={handleChange}
           required
-          type={showPassword ? 'text' : 'password'} // Tipo dinámico
-          onEndIconClick={handleTogglePassword}     // Acción al hacer clic en el icono
-          endIcon={showPassword ? <VisibilityOff /> : <Visibility />} // Icono dinámico
+          type={showPassword ? 'text' : 'password'}
+          onEndIconClick={handleTogglePassword}
+          endIcon={showPassword ? <VisibilityOff /> : <Visibility />}
         />
       </div>
       
-      {/* --- DOMICILIO LEGAL --- */}
       <div className="mt-4">
         <h3 className="text-lg font-sans font-semibold text-primary border-b mb-2">Domicilio Legal</h3>
         <div className="grid grid-cols-12 gap-x-6">
@@ -118,22 +158,22 @@ const CompanyForm = ({ onClose, onAddCompany }) => {
         </div>
         <div className="grid grid-cols-12 gap-x-6 mt-4">
           <div className="col-span-6 sm:col-span-3 md:col-span-2"><Input label="C. Postal" id="cp" name="cp" value={formData.cp} onChange={handleChange} required maxLength="6" /></div>
-          <div className="col-span-6 sm:col-span-4 md:col-span-3"><Input label="Provincia" id="provincia" name="provincia" value={formData.provincia} onChange={handleChange} required /></div>
+          <div className="col-span-6 sm:col-span-4 md:col-span-3">
+            <Select label="Provincia" id="provincia" name="provincia" value={formData.provincia} onChange={handleChange} required options={provinciasOptions} />
+          </div>
           <div className="col-span-6 sm:col-span-5 md:col-span-4"><Input label="Localidad" id="localidad" name="localidad" value={formData.localidad} onChange={handleChange} /></div>
           <div className="col-span-6 sm:col-span-12 md:col-span-3"><Input label="País" id="pais" name="pais" value={formData.pais} onChange={handleChange} /></div>
         </div>
       </div>
 
-      {/* --- DATOS LABORALES --- */}
       <div className="mt-4">
         <h3 className="text-lg font-sans font-semibold text-primary border-b mb-2">Datos Laborales</h3>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
         <Select label="Convenios Aplicables" id="convenios" name="convenios" value={formData.convenios} onChange={handleConveniosChange} required multiple options={conveniosOptions} />
-        <Select label="Medio de Pago (Veps)" id="medioDePago" name="medioDePago" value={formData.medioDeago} onChange={handleChange} required options={medioDePagoOptions} />
+        <Select label="Medio de Pago (Veps)" id="medioDePago" name="medioDePago" value={formData.medioDePago} onChange={handleChange} required options={medioDePagoOptions} />
       </div>
 
-      {/* --- CONTACTO PRINCIPAL --- */}
       <div className="mt-4">
         <h3 className="text-lg font-sans font-semibold text-primary border-b mb-2">Contacto Principal</h3>
       </div>
@@ -143,14 +183,27 @@ const CompanyForm = ({ onClose, onAddCompany }) => {
         <Input label="Celular" id="celular" name="celular" value={formData.celular} onChange={handleChange} type="tel" required />
       </div>
 
-      {/* --- BOTONES DE ACCIÓN --- */}
-      <div className="flex justify-end space-x-4 pt-4 mt-6 border-t">
-        <Button type="button" variant="secondary" onClick={onClose}>
-          Cancelar
-        </Button>
-        <Button type="submit" variant="primary">
-          Guardar Empresa
-        </Button>
+      <div className="flex justify-between items-center pt-4 mt-6 border-t">
+        <div>
+          {initialData && (
+            <Button
+              type="button"
+              variant={initialData.status === 'Activo' ? 'secondary' : 'success'}
+              onClick={handleToggleClick}
+            >
+              {initialData.status === 'Activo' ? 'Desactivar Empresa' : 'Activar Empresa'}
+            </Button>
+          )}
+        </div>
+        
+        <div className="flex space-x-4">
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="primary">
+            Guardar
+          </Button>
+        </div>
       </div>
     </form>
   );

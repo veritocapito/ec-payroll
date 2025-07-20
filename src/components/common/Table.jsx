@@ -17,10 +17,12 @@ const Table = ({ columns, data }) => {
         </thead>
         <tbody className="font-serif">
           {data.map((row) => (
-            <tr key={row.id} className="bg-white border-b hover:bg-neutral-light">
+            <tr 
+              key={row.id} 
+              className={`border-b hover:bg-neutral-light transition-colors ${row.status === 'Inactivo' ? 'bg-slate-50 opacity-60' : 'bg-white'}`}
+            >
               {columns.map((col) => (
                 <td key={`${row.id}-${col.accessor}`} className="py-4 px-6">
-                  {/* Si la columna tiene un 'cell' renderer, lo usamos. Si no, mostramos el dato. */}
                   {col.cell ? col.cell(row) : row[col.accessor]}
                 </td>
               ))}
