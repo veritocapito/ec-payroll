@@ -6,6 +6,7 @@ import DashboardPage from '../pages/DashboardPage.jsx';
 import CompaniesPage from '../pages/CompaniesPage.jsx';
 import CompanyDetailPage from '../pages/CompanyDetailPage.jsx';
 import EmployeesPage from '../pages/EmployeesPage.jsx';
+import EmployeeDetailPage from '../pages/EmployeeDetailPage.jsx';
 
 const AppRouter = () => {
   return (
@@ -20,6 +21,7 @@ const AppRouter = () => {
           <Route index element={<CompaniesPage />} />
           <Route path=":companyId" element={<CompanyDetailPage />} />
           <Route path=":companyId/employees" element={<EmployeesPage />} />
+           <Route path=":companyId/employees/:employeeId" element={<EmployeeDetailPage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />

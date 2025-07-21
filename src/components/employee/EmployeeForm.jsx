@@ -94,8 +94,8 @@ const EmployeeForm = ({ onClose, onSave, initialData = null, companyData }) => {
       <div className="grid grid-cols-12 gap-x-6">
           <div className="col-span-12 md:col-span-6"><Input label="Calle" name="calle" value={formData.calle} onChange={handleChange} required /></div>
           <div className="col-span-4 md:col-span-2"><Input label="Número" name="numero" value={formData.numero} onChange={handleChange} type="text" required /></div>
-          <div className="col-span-4 md:col-span-2"><Input label="Piso" name="piso" value={formData.piso} onChange={handleChange} required /></div>
-          <div className="col-span-4 md:col-span-2"><Input label="Depto" name="depto" value={formData.depto} onChange={handleChange} required /></div>
+          <div className="col-span-4 md:col-span-2"><Input label="Piso" name="piso" value={formData.piso} onChange={handleChange} /></div>
+          <div className="col-span-4 md:col-span-2"><Input label="Depto" name="depto" value={formData.depto} onChange={handleChange} /></div>
       </div>
       <div className="grid grid-cols-12 gap-x-6 mt-4">
         <div className="col-span-6 sm:col-span-3 md:col-span-2"><Input label="C. Postal" id="cp" name="cp" value={formData.cp} onChange={handleChange} required maxLength="6" /></div>

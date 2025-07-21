@@ -4,33 +4,49 @@ const Table = ({ columns, data }) => {
   }
 
   return (
-    <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
-      <table className="w-full text-sm text-left text-neutral-dark">
-        <thead className="text-xs text-primary uppercase bg-slate-200 font-sans">
-          <tr>
-            {columns.map((col) => (
-              <th key={col.header} scope="col" className="py-3 px-6">
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="font-serif">
-          {data.map((row) => (
-            <tr 
-              key={row.id} 
-              className={`border-b hover:bg-neutral-light transition-colors ${row.status === 'Inactivo' ? 'bg-slate-50 opacity-60' : 'bg-white'}`}
-            >
-              {columns.map((col) => (
-                <td key={`${row.id}-${col.accessor}`} className="py-4 px-6">
-                  {col.cell ? col.cell(row) : row[col.accessor]}
-                </td>
+    <>
+      {/* Vista de Tabla para Escritorio (md y superior) */}
+      <div className="hidden lg:block">
+        <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+          <table className="w-full text-sm text-left text-neutral-dark">
+            <thead className="text-xs text-primary uppercase bg-slate-200 font-sans">
+              <tr>
+                {columns.map((col) => (
+                  <th key={col.header} scope="col" className="py-3 px-6">{col.header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="font-serif">
+              {data.map((row) => (
+                <tr key={row.id} className={`border-b hover:bg-neutral-light transition-colors ${row.status === 'Inactivo' ? 'bg-slate-50 opacity-60' : 'bg-white'}`}>
+                  {columns.map((col) => (
+                    <td key={`${row.id}-${col.accessor}`} className="py-4 px-6">
+                      {col.cell ? col.cell(row) : row[col.accessor]}
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Vista de Tarjetas para Móvil (hasta md) */}
+      <div className="block lg:hidden space-y-4">
+        {data.map((row) => (
+          <div key={row.id} className={`bg-white p-4 rounded-lg shadow-md border ${row.status === 'Inactivo' ? 'opacity-60' : ''}`}>
+            {columns.map((col) => (
+              <div key={col.header} className="flex justify-between py-1 border-b last:border-b-0">
+                <span className="font-sans font-bold text-sm text-gray-600">{col.header}:</span>
+                <span className="text-right font-serif text-sm">
+                  {col.cell ? col.cell(row) : row[col.accessor]}
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 

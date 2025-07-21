@@ -8,37 +8,39 @@ import EmployeeForm from '../components/employee/EmployeeForm';
 const EmployeesPage = () => {
   const location = useLocation();
   const { companyId } = useParams();
-
-  // Recibimos los datos de la empresa desde la página anterior
   const company = location.state?.company;
 
-  // Estado para la lista de empleados y el modal del formulario
   const [employees, setEmployees] = useState(company?.employees || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Columnas para la tabla de empleados
   const employeeColumns = [
+    { header: 'Legajo', accessor: 'legajo' },
     { header: 'Apellido', accessor: 'apellido' },
     { header: 'Nombres', accessor: 'nombres' },
-    { header: 'CUIL', accessor: 'cuil' },
+    { 
+      header: 'CUIL',
+      cell: (row) => <span className="whitespace-nowrap">{row.cuil}</span>
+    },
+    { header: 'Fecha de Ingreso', accessor: 'fechaIngreso' },
+    { header: 'Categoría', accessor: 'categoria' },
     { 
       header: 'Acciones', 
       cell: (row) => (
         <div className="flex space-x-2">
+          <Link to={`/companies/${companyId}/employees/${row.id}`} state={{ employee: row, company: company }}>
+            <Button variant="secondary" className="py-1 px-2 text-xs">Ver</Button>
+          </Link>
           <Button variant="secondary" className="py-1 px-2 text-xs">Editar</Button>
+          <Button variant="info" className="py-1 px-2 text-xs whitespace-nowrap">Registrar Baja</Button>
         </div>
       ) 
     },
   ];
   
-  // Función para guardar (crear o editar) un empleado
   const handleSaveEmployee = (employeeData) => {
-    // Por ahora, solo implementamos la creación
-    // A futuro, aquí distinguiremos entre crear y editar
     setEmployees(prev => [...prev, { ...employeeData, id: Date.now() }]);
   };
   
-  // Manejo de error si se accede a la página directamente sin datos de la empresa
   if (!company) {
     return (
       <div className="text-center p-8 bg-white rounded-lg shadow-md">
@@ -53,30 +55,23 @@ const EmployeesPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold font-sans text-primary">Gestión de Empleados</h1>
           <p className="text-lg text-gray-600 font-serif">{company.razonSocial}</p>
         </div>
-        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-          + Agregar Empleado
-        </Button>
+        <div className="flex space-x-4">
+          <Button variant="primary" onClick={() => setIsModalOpen(true)}>+ Agregar Empleado</Button>
+          <Link to="/companies"><Button variant="secondary">← Volver a Empresas</Button></Link>
+        </div>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
         <Table columns={employeeColumns} data={employees} />
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Agregar Nuevo Empleado"
-      >
-        <EmployeeForm
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveEmployee}
-          companyData={company} 
-        />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Agregar Nuevo Empleado">
+        <EmployeeForm onClose={() => setIsModalOpen(false)} onSave={handleSaveEmployee} companyData={company}/>
       </Modal>
     </div>
   );

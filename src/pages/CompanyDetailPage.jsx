@@ -35,11 +35,8 @@ const CompanyDetailPage = () => {
           <p className="text-lg text-gray-600 font-serif">Detalles de la Empresa</p>
         </div>
         <div className="flex space-x-4">
-          <Link to={`/companies/${companyId}/employees`} state={{ company: company }}>
-            <Button variant="primary">Gestionar Empleados</Button>
-          </Link>
           <Link to="/companies">
-            <Button variant="secondary">← Volver al listado</Button>
+            <Button variant="secondary">← Volver a Empresas</Button>
           </Link>
         </div>
       </div>
