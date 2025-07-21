@@ -17,8 +17,6 @@ const CompaniesPage = () => {
   const [companyToToggle, setCompanyToToggle] = useState(null);
 
   useEffect(() => {
-    // Para esta simulación, vamos a cargar datos de ejemplo.
-    // En una app real, esto vendría de una API.
     const mockCompanies = [
         { id: 1, razonSocial: 'Estudio Contable Diaz', cuit: '30-11223344-5', contactEmail: 'contacto@diaz.com', status: 'Activo' },
         { id: 2, razonSocial: 'Constructora del Sur S.A.', cuit: '30-55667788-9', contactEmail: 'admin@constructora.com', status: 'Activo' },
@@ -39,7 +37,9 @@ const CompaniesPage = () => {
 
   const handleSaveCompany = (companyData) => {
     if (editingCompany) {
-      setCompanies(prev => prev.map(c => c.id === editingCompany.id ? { ...c, ...companyData } : c));
+      setCompanies(prev => prev.map(c => 
+        c.id === editingCompany.id ? { ...c, ...companyData } : c
+      ));
     } else {
       setCompanies(prev => [...prev, { ...companyData, id: Date.now(), status: 'Activo' }]);
     }
@@ -73,16 +73,19 @@ const CompaniesPage = () => {
 
   const columns = [
     { header: 'Razón Social', accessor: 'razonSocial' },
-    { header: 'CUIT', accessor: 'cuit' },
+    { header: 'CUIT', accessor: 'cuit', cell: (row) => <span className="whitespace-nowrap">{row.cuit}</span> },
     { header: 'Email de Contacto', accessor: 'contactEmail' },
     {
       header: 'Acciones',
       cell: (row) => (
         <div className="flex space-x-2">
-          <Link to={`/empresas/${row.id}`} state={{ company: row }}>
+          <Link to={`/companies/${row.id}`} state={{ company: row }}>
             <Button variant="secondary" className="py-1 px-2 text-xs">Ver</Button>
           </Link>
           <Button variant="secondary" onClick={() => handleOpenEditModal(row)} className="py-1 px-2 text-xs">Editar</Button>
+          <Link to={`/companies/${row.id}/employees`} state={{ company: row }}>
+            <Button variant="info" className="py-1 px-2 text-xs">Nómina</Button>
+          </Link>
         </div>
       ),
     },
@@ -90,10 +93,12 @@ const CompaniesPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold font-sans text-primary">
-          Gestión de Empresas
-        </h1>
+      <div className="flex flex-col lg:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold font-sans text-primary">
+            Gestión de Empresas
+          </h1>
+        </div>
         <Button variant="primary" onClick={handleOpenAddModal}>
           + Agregar Empresa
         </Button>
@@ -133,7 +138,7 @@ const CompaniesPage = () => {
         <div className="flex justify-end space-x-4 mt-6">
           <Button variant="secondary" onClick={() => setIsConfirmModalOpen(false)}>Cancelar</Button>
           <Button 
-            variant={companyToToggle?.status === 'Activo' ? 'secondary' : 'success'} 
+            variant={companyToToggle?.status === 'Activo' ? 'danger' : 'success'} 
             onClick={handleToggleStatus}
           >
             Confirmar

@@ -20,7 +20,7 @@ const CompanyDetailPage = () => {
       <div className="text-center">
         <h1 className="text-2xl font-bold font-sans text-danger">Error</h1>
         <p className="font-serif">No se pudo cargar la información de la empresa.</p>
-        <Link to="/empresas">
+        <Link to="/companies">
           <Button variant="primary" className="mt-4">Volver al listado</Button>
         </Link>
       </div>
@@ -34,9 +34,11 @@ const CompanyDetailPage = () => {
           <h1 className="text-3xl font-bold font-sans text-primary">{company.razonSocial}</h1>
           <p className="text-lg text-gray-600 font-serif">Detalles de la Empresa</p>
         </div>
-        <Link to="/empresas">
-          <Button variant="secondary">← Volver al listado</Button>
-        </Link>
+        <div className="flex space-x-4">
+          <Link to="/companies">
+            <Button variant="secondary">← Volver a Empresas</Button>
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
