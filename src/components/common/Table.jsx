@@ -5,8 +5,8 @@ const Table = ({ columns, data }) => {
 
   return (
     <>
-      {/* Vista de Tabla para Escritorio (md y superior) */}
-      <div className="hidden lg:block">
+      {/* Vista de Tabla para Tablets y Escritorio */}
+      <div className="hidden sm:block">
         <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
           <table className="w-full text-sm text-left text-neutral-dark">
             <thead className="text-xs text-primary uppercase bg-slate-200 font-sans">
@@ -31,8 +31,8 @@ const Table = ({ columns, data }) => {
         </div>
       </div>
       
-      {/* Vista de Tarjetas para Móvil (hasta md) */}
-      <div className="block lg:hidden space-y-4">
+      {/* Vista de Tarjetas para Móvil */}
+      <div className="block sm:hidden space-y-4">
         {data.map((row) => (
           <div key={row.id} className={`bg-white p-4 rounded-lg shadow-md border ${row.status === 'Inactivo' ? 'opacity-60' : ''}`}>
             {columns.map((col) => (
