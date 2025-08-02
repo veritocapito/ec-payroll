@@ -4,6 +4,10 @@ import Button from '../components/common/Button';
 import Table from '../components/common/Table';
 import Modal from '../components/common/Modal';
 import EmployeeForm from '../components/employee/EmployeeForm';
+import IconButton from '@mui/material/IconButton';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import ArchiveIcon from '@mui/icons-material/Archive';
 
 const EmployeesPage = () => {
   const location = useLocation();
@@ -12,33 +16,28 @@ const EmployeesPage = () => {
 
   const [employees, setEmployees] = useState(company?.employees || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
 
-  const employeeColumns = [
-    { header: 'Legajo', accessor: 'legajo' },
-    { header: 'Apellido', accessor: 'apellido' },
-    { header: 'Nombres', accessor: 'nombres' },
-    { 
-      header: 'CUIL',
-      cell: (row) => <span className="whitespace-nowrap">{row.cuil}</span>
-    },
-    { header: 'Fecha de Ingreso', accessor: 'fechaIngreso' },
-    { header: 'Categoría', accessor: 'categoria' },
-    { 
-      header: 'Acciones', 
-      cell: (row) => (
-        <div className="flex space-x-2">
-          <Link to={`/companies/${companyId}/employees/${row.id}`} state={{ employee: row, company: company }}>
-            <Button variant="secondary" className="py-1 px-2 text-xs">Ver</Button>
-          </Link>
-          <Button variant="secondary" className="py-1 px-2 text-xs">Editar</Button>
-          <Button variant="info" className="py-1 px-2 text-xs whitespace-nowrap">Registrar Baja</Button>
-        </div>
-      ) 
-    },
-  ];
+  const handleOpenAddModal = () => {
+    setEditingEmployee(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (employee) => {
+    setEditingEmployee(employee);
+    setIsModalOpen(true);
+  };
   
   const handleSaveEmployee = (employeeData) => {
-    setEmployees(prev => [...prev, { ...employeeData, id: Date.now() }]);
+    if (editingEmployee) {
+      setEmployees(prev => 
+        prev.map(emp => 
+          emp.id === editingEmployee.id ? { ...emp, ...employeeData } : emp
+        )
+      );
+    } else {
+      setEmployees(prev => [...prev, { ...employeeData, id: Date.now() }]);
+    }
   };
   
   if (!company) {
@@ -53,6 +52,44 @@ const EmployeesPage = () => {
     );
   }
 
+  const employeeColumns = [
+    { header: 'Legajo', accessor: 'legajo' },
+    { header: 'Apellido', accessor: 'apellido' },
+    { header: 'Nombres', accessor: 'nombres' },
+    { 
+      header: 'CUIL',
+      cell: (row) => <span className="whitespace-nowrap">{row.cuil}</span>
+    },
+    { header: 'Fecha de Ingreso', accessor: 'fechaIngreso' },
+    { header: 'Categoría', accessor: 'categoria' },
+    { 
+      header: 'Remuneración',
+      cell: (row) => (
+        <span className="whitespace-nowrap">
+          {`$ ${new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2 }).format(row.remuneracion || 0)}`}
+        </span>
+      )
+    },
+    { 
+      header: 'Acciones', 
+      cell: (row) => (
+        <div className="flex items-center">
+          <Link to={`/companies/${companyId}/employees/${row.id}`} state={{ employee: row, company: company }} title="Ver Empleado">
+            <IconButton size="small">
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+          </Link>
+          <IconButton size="small" onClick={() => handleOpenEditModal(row)} title="Editar Empleado">
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <IconButton size="small" onClick={() => console.log('Registrar Baja:', row.id)} title="Registrar Baja">
+            <ArchiveIcon fontSize="small" />
+          </IconButton>
+        </div>
+      ) 
+    },
+  ];
+
   return (
     <div>
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
@@ -61,7 +98,7 @@ const EmployeesPage = () => {
           <p className="text-lg text-gray-600 font-serif">{company.razonSocial}</p>
         </div>
         <div className="flex space-x-4">
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>+ Agregar Empleado</Button>
+          <Button variant="primary" onClick={handleOpenAddModal}>+ Agregar Empleado</Button>
           <Link to="/companies"><Button variant="secondary">← Volver a Empresas</Button></Link>
         </div>
       </div>
@@ -70,8 +107,17 @@ const EmployeesPage = () => {
         <Table columns={employeeColumns} data={employees} />
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Agregar Nuevo Empleado">
-        <EmployeeForm onClose={() => setIsModalOpen(false)} onSave={handleSaveEmployee} companyData={company}/>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingEmployee ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}
+      >
+        <EmployeeForm
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveEmployee}
+          companyData={company}
+          initialData={editingEmployee}
+        />
       </Modal>
     </div>
   );
