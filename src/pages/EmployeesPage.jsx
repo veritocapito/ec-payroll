@@ -18,6 +18,9 @@ const EmployeesPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
 
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [employeeToTerminate, setEmployeeToTerminate] = useState(null);
+
   const handleOpenAddModal = () => {
     setEditingEmployee(null);
     setIsModalOpen(true);
@@ -37,6 +40,23 @@ const EmployeesPage = () => {
       );
     } else {
       setEmployees(prev => [...prev, { ...employeeData, id: Date.now() }]);
+    }
+  };
+
+  const handleOpenConfirmModal = (employee) => {
+    setEmployeeToTerminate(employee);
+    setIsConfirmModalOpen(true);
+  };
+
+  const handleConfirmTerminate = () => {
+    if (employeeToTerminate) {
+      setEmployees(prev =>
+        prev.map(emp =>
+          emp.id === employeeToTerminate.id ? { ...emp, status: 'Baja' } : emp
+        )
+      );
+      setIsConfirmModalOpen(false);
+      setEmployeeToTerminate(null);
     }
   };
   
@@ -82,7 +102,7 @@ const EmployeesPage = () => {
           <IconButton size="small" onClick={() => handleOpenEditModal(row)} title="Editar Empleado">
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => console.log('Registrar Baja:', row.id)} title="Registrar Baja">
+          <IconButton size="small" onClick={() => handleOpenConfirmModal(row)} title="Registrar Baja">
             <ArchiveIcon fontSize="small" />
           </IconButton>
         </div>
@@ -107,17 +127,30 @@ const EmployeesPage = () => {
         <Table columns={employeeColumns} data={employees} />
       </div>
 
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingEmployee ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}>
+        <EmployeeForm onClose={() => setIsModalOpen(false)} onSave={handleSaveEmployee} companyData={company} initialData={editingEmployee}/>
+      </Modal>
+
       <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingEmployee ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        title="Confirmar Baja de Empleado"
       >
-        <EmployeeForm
-          onClose={() => setIsModalOpen(false)}
-          onSave={handleSaveEmployee}
-          companyData={company}
-          initialData={editingEmployee}
-        />
+        <div className="font-serif">
+          <p>
+            ¿Estás seguro de que deseas registrar la baja del empleado 
+            <strong className="font-sans text-primary"> {employeeToTerminate?.nombres} {employeeToTerminate?.apellido}</strong>?
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            El estado del empleado cambiará a "Baja" y sus datos se conservarán.
+          </p>
+        </div>
+        <div className="flex justify-end space-x-4 mt-6">
+          <Button variant="secondary" onClick={() => setIsConfirmModalOpen(false)}>Cancelar</Button>
+          <Button variant="danger" onClick={handleConfirmTerminate}>
+            Confirmar Baja
+          </Button>
+        </div>
       </Modal>
     </div>
   );

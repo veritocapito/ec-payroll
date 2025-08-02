@@ -1,29 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getCompanies } from '../services/companyService.js';
+import useLocalStorage from '../hooks/useLocalStorage';
 import Table from '../components/common/Table.jsx';
-import Spinner from '../components/common/Spinner.jsx';
 import Button from '../components/common/Button.jsx';
 import Modal from '../components/common/Modal.jsx';
 import CompanyForm from '../components/company/CompanyForm.jsx';
 
+const initialCompanies = [
+  { 
+    id: 1, 
+    razonSocial: 'Estudio Contable Diaz', 
+    cuit: '30-11223344-5', 
+    contactEmail: 'contacto@diaz.com', 
+    status: 'Activo',
+    employees: [] 
+  },
+  { 
+    id: 2, 
+    razonSocial: 'Constructora del Sur S.A.', 
+    cuit: '30-55667788-9', 
+    contactEmail: 'admin@constructora.com', 
+    status: 'Activo',
+    employees: []
+  },
+];
+
 const CompaniesPage = () => {
-  const [companies, setCompanies] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [companies, setCompanies] = useLocalStorage('companies', initialCompanies);
+  
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
-  
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [companyToToggle, setCompanyToToggle] = useState(null);
-
-  useEffect(() => {
-    const mockCompanies = [
-        { id: 1, razonSocial: 'Estudio Contable Diaz', cuit: '30-11223344-5', contactEmail: 'contacto@diaz.com', status: 'Activo' },
-        { id: 2, razonSocial: 'Constructora del Sur S.A.', cuit: '30-55667788-9', contactEmail: 'admin@constructora.com', status: 'Activo' },
-    ];
-    setCompanies(mockCompanies);
-    setIsLoading(false);
-  }, []);
 
   const handleOpenAddModal = () => {
     setEditingCompany(null);
@@ -41,7 +49,7 @@ const CompaniesPage = () => {
         c.id === editingCompany.id ? { ...c, ...companyData } : c
       ));
     } else {
-      setCompanies(prev => [...prev, { ...companyData, id: Date.now(), status: 'Activo' }]);
+      setCompanies(prev => [...prev, { ...companyData, id: Date.now(), status: 'Activo', employees: [] }]);
     }
   };
 
@@ -73,7 +81,10 @@ const CompaniesPage = () => {
 
   const columns = [
     { header: 'Razón Social', accessor: 'razonSocial' },
-    { header: 'CUIT', accessor: 'cuit', cell: (row) => <span className="whitespace-nowrap">{row.cuit}</span> },
+    { 
+      header: 'CUIT',
+      cell: (row) => <span className="whitespace-nowrap">{row.cuit}</span>
+    },
     { header: 'Email de Contacto', accessor: 'contactEmail' },
     {
       header: 'Acciones',
@@ -93,7 +104,7 @@ const CompaniesPage = () => {
 
   return (
     <div>
-      <div className="flex flex-col lg:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold font-sans text-primary">
             Gestión de Empresas
@@ -105,7 +116,7 @@ const CompaniesPage = () => {
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
-        {isLoading ? <Spinner /> : <Table columns={columns} data={companies} />}
+        <Table columns={columns} data={companies} />
       </div>
       
       <Modal 
