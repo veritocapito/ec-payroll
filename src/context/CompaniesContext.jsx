@@ -1,8 +1,8 @@
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import useLocalStorage from '../hooks/useLocalStorage';
 
 // 1. Crear el contexto
-const CompaniesContext = createContext();
+export const CompaniesContext = createContext();
 
 // Datos iniciales (semilla para localStorage)
 const initialCompanies = [
@@ -63,13 +63,4 @@ export const CompaniesProvider = ({ children }) => {
       {children}
     </CompaniesContext.Provider>
   );
-};
-
-// 3. Crear un hook personalizado para consumir el contexto fácilmente
-export const useCompanies = () => {
-  const context = useContext(CompaniesContext);
-  if (context === undefined) {
-    throw new Error('useCompanies must be used within a CompaniesProvider');
-  }
-  return context;
 };

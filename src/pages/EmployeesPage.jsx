@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { useCompanies } from '../context/CompaniesContext'; // <-- Se usa el hook del contexto
+import { useCompanies } from '../hooks/useCompanies.js';
 import Button from '../components/common/Button';
 import Table from '../components/common/Table';
 import Modal from '../components/common/Modal';
