@@ -8,13 +8,12 @@ const Input = ({ label, id, name, type = 'text', value, onChange, placeholder, c
         {label}
         {required && <span className="text-danger ml-1">*</span>}
       </label>
-      {/* Contenedor relativo para posicionar el icono */}
       <div className="relative">
         <input
           type={type}
           id={id || name}
           name={name}
-          value={value}
+          value={value || ''}
           onChange={onChange}
           placeholder={placeholder}
           className={`${baseStyle} ${paddingStyle} ${className}`}
