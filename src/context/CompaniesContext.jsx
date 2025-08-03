@@ -37,12 +37,49 @@ export const CompaniesProvider = ({ children }) => {
       return prevCompanies.map(c => {
         if (c.id === companyId) {
           let updatedEmployees;
-          if (employeeData.id) { // Si el empleado tiene ID, es una edición
+          if (employeeData.id) { // Edición
             updatedEmployees = c.employees.map(emp => emp.id === employeeData.id ? { ...emp, ...employeeData } : emp);
-          } else { // Si no, es uno nuevo
-            const newEmployee = { ...employeeData, id: Date.now(), status: 'Activo' };
+          } else { // Creación
+            const newEmployee = { 
+              ...employeeData,
+              id: Date.now(),
+              status: 'Activo',
+              workPeriods: [{
+                hireDate: employeeData.hireDate,
+                terminationDate: null,
+                terminationReason: null,
+                documentation: null,
+              }]
+            };
             updatedEmployees = [...(c.employees || []), newEmployee];
           }
+          return { ...c, employees: updatedEmployees };
+        }
+        return c;
+      });
+    });
+  };
+
+  const handleTerminateEmployee = (companyId, employeeId, terminationData) => {
+    setCompanies(prevCompanies => {
+      return prevCompanies.map(c => {
+        if (c.id === companyId) {
+          const updatedEmployees = c.employees.map(emp => {
+            if (emp.id === employeeId) {
+              // Actualizamos el último período de trabajo
+              const lastPeriodIndex = emp.workPeriods.length - 1;
+              const updatedPeriods = [...emp.workPeriods];
+              updatedPeriods[lastPeriodIndex] = {
+                ...updatedPeriods[lastPeriodIndex],
+                terminationDate: terminationData.terminationDate,
+                terminationReason: terminationData.terminationReason,
+                documentation: terminationData.documentation?.name || null, // Guardamos solo el nombre del archivo
+              };
+              // Cambiamos el estado general del empleado
+              return { ...emp, status: 'Terminated', workPeriods: updatedPeriods };
+            }
+            return emp;
+          });
           return { ...c, employees: updatedEmployees };
         }
         return c;
@@ -56,6 +93,7 @@ export const CompaniesProvider = ({ children }) => {
     handleSaveCompany,
     handleToggleCompanyStatus,
     handleSaveEmployee,
+    handleTerminateEmployee,
   };
 
   return (

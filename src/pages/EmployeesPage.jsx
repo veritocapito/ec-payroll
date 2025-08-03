@@ -5,6 +5,7 @@ import Button from '../components/common/Button';
 import Table from '../components/common/Table';
 import Modal from '../components/common/Modal';
 import EmployeeForm from '../components/employee/EmployeeForm';
+import TerminationForm from '../components/employee/TerminationForm';
 import IconButton from '@mui/material/IconButton';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -12,31 +13,42 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 
 const EmployeesPage = () => {
   const { companyId } = useParams();
-  // Obtenemos los datos y funciones directamente del contexto
-  const { companies, handleSaveEmployee } = useCompanies();
+  const { companies, handleSaveEmployee, handleTerminateEmployee } = useCompanies();
 
-  // Encontramos la empresa correcta usando el 'companyId' de la URL
   const company = companies.find(c => c.id === parseInt(companyId));
-  // Derivamos la lista de empleados de la empresa encontrada
   const employees = company?.employees || [];
   
-  // El estado de los modales es local a la página
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
+
+  const [isTerminationModalOpen, setIsTerminationModalOpen] = useState(false);
+  const [employeeToTerminate, setEmployeeToTerminate] = useState(null);
 
   const handleOpenAddModal = () => {
     setEditingEmployee(null);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
 
   const handleOpenEditModal = (employee) => {
     setEditingEmployee(employee);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
   
-  // Esta función ahora solo necesita llamar a la función del contexto
   const onSave = (employeeData) => {
     handleSaveEmployee(company.id, employeeData);
+  };
+
+  const handleOpenTerminationModal = (employee) => {
+    setEmployeeToTerminate(employee);
+    setIsTerminationModalOpen(true);
+  };
+
+  const handleConfirmTermination = (terminationData) => {
+    if (employeeToTerminate) {
+      handleTerminateEmployee(company.id, employeeToTerminate.id, terminationData);
+      setIsTerminationModalOpen(false);
+      setEmployeeToTerminate(null);
+    }
   };
   
   if (!company) {
@@ -52,11 +64,16 @@ const EmployeesPage = () => {
   }
   
   const employeeColumns = [
-    { header: 'Legajo', accessor: 'legajo' },
-    { header: 'Apellido', accessor: 'apellido' },
-    { header: 'Nombres', accessor: 'nombres' },
+    { header: 'Legajo', accessor: 'fileNumber' },
+    { header: 'Apellido', accessor: 'lastName' },
+    { header: 'Nombres', accessor: 'firstName' },
     { header: 'CUIL', cell: (row) => <span className="whitespace-nowrap">{row.cuil}</span> },
-    { header: 'Remuneración', cell: (row) => ( <span className="whitespace-nowrap">{`$ ${new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2 }).format(row.remuneracion || 0)}`}</span> ) },
+    { 
+      header: 'Fecha de Ingreso', 
+      cell: (row) => row.workPeriods?.[row.workPeriods.length - 1]?.hireDate || '-'
+    },
+    { header: 'Categoría', accessor: 'category' },
+    { header: 'Remuneración', cell: (row) => ( <span className="whitespace-nowrap">{`$ ${new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2 }).format(row.salary || 0)}`}</span> ) },
     { 
       header: 'Acciones', 
       cell: (row) => (
@@ -67,7 +84,7 @@ const EmployeesPage = () => {
           <IconButton size="small" onClick={() => handleOpenEditModal(row)} title="Editar Empleado">
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => console.log('Registrar Baja:', row.id)} title="Registrar Baja">
+          <IconButton size="small" onClick={() => handleOpenTerminationModal(row)} title="Registrar Baja">
             <ArchiveIcon fontSize="small" />
           </IconButton>
         </div>
@@ -93,15 +110,25 @@ const EmployeesPage = () => {
       </div>
 
       <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isFormModalOpen}
+        onClose={() => setIsFormModalOpen(false)}
         title={editingEmployee ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}
       >
         <EmployeeForm
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => setIsFormModalOpen(false)}
           onSave={onSave}
           companyData={company}
           initialData={editingEmployee}
+        />
+      </Modal>
+            <Modal
+        isOpen={isTerminationModalOpen}
+        onClose={() => setIsTerminationModalOpen(false)}
+        title={`Registrar Baja de ${employeeToTerminate?.firstName} ${employeeToTerminate?.lastName}`}
+      >
+        <TerminationForm 
+          onClose={() => setIsTerminationModalOpen(false)}
+          onConfirm={handleConfirmTermination}
         />
       </Modal>
     </div>

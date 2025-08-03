@@ -1,7 +1,6 @@
-const Select = ({ label, id, name, required = false, multiple = false, options = [], className = '', ...props }) => {
+const Select = ({ label, id, name, required = false, multiple = false, options = [], className = '', value, ...props }) => {
   const baseStyle = 'shadow-sm appearance-none border rounded w-full py-2 px-3 bg-white text-neutral-dark leading-tight focus:outline-none focus:ring-2 focus:ring-secondary';
   
-  // Si es de selección múltiple, la altura se ajusta para mostrar más opciones
   const multipleStyle = multiple ? 'h-32' : '';
 
   return (
@@ -15,6 +14,7 @@ const Select = ({ label, id, name, required = false, multiple = false, options =
         name={name}
         required={required}
         multiple={multiple}
+        value={value || (multiple ? [] : '')}
         className={`${baseStyle} ${multipleStyle} ${className}`}
         {...props}
       >
