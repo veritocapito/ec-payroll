@@ -1,11 +1,14 @@
 import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './routes/AppRouter';
+import { CompaniesProvider } from './context/CompaniesContext.jsx';
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppRouter />
-    </BrowserRouter>
+    <CompaniesProvider>
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
+    </CompaniesProvider>
   );
 }
 

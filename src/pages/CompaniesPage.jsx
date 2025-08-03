@@ -1,38 +1,21 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import useLocalStorage from '../hooks/useLocalStorage';
+import { useCompanies } from '../context/CompaniesContext'; // <-- Se usa el hook del contexto
 import Table from '../components/common/Table.jsx';
 import Button from '../components/common/Button.jsx';
 import Modal from '../components/common/Modal.jsx';
 import CompanyForm from '../components/company/CompanyForm.jsx';
 
-const initialCompanies = [
-  { 
-    id: 1, 
-    razonSocial: 'Estudio Contable Diaz', 
-    cuit: '30-11223344-5', 
-    contactEmail: 'contacto@diaz.com', 
-    status: 'Activo',
-    employees: [] 
-  },
-  { 
-    id: 2, 
-    razonSocial: 'Constructora del Sur S.A.', 
-    cuit: '30-55667788-9', 
-    contactEmail: 'admin@constructora.com', 
-    status: 'Activo',
-    employees: []
-  },
-];
-
 const CompaniesPage = () => {
-  const [companies, setCompanies] = useLocalStorage('companies', initialCompanies);
+  // Obtenemos los datos y las funciones directamente del contexto
+  const { companies, handleSaveCompany, handleToggleCompanyStatus } = useCompanies();
   
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [companyToToggle, setCompanyToToggle] = useState(null);
 
+  // Funciones para abrir los modales y preparar los datos
   const handleOpenAddModal = () => {
     setEditingCompany(null);
     setIsFormModalOpen(true);
@@ -43,30 +26,14 @@ const CompaniesPage = () => {
     setIsFormModalOpen(true);
   };
 
-  const handleSaveCompany = (companyData) => {
-    if (editingCompany) {
-      setCompanies(prev => prev.map(c => 
-        c.id === editingCompany.id ? { ...c, ...companyData } : c
-      ));
-    } else {
-      setCompanies(prev => [...prev, { ...companyData, id: Date.now(), status: 'Activo', employees: [] }]);
-    }
-  };
-
   const openConfirmModal = (company) => {
     setCompanyToToggle(company);
     setIsConfirmModalOpen(true);
   };
 
-  const handleToggleStatus = () => {
+  const handleConfirmToggle = () => {
     if (companyToToggle) {
-      setCompanies(prev =>
-        prev.map(c =>
-          c.id === companyToToggle.id
-            ? { ...c, status: c.status === 'Activo' ? 'Inactivo' : 'Activo' }
-            : c
-        )
-      );
+      handleToggleCompanyStatus(companyToToggle.id);
       setIsConfirmModalOpen(false);
       setCompanyToToggle(null);
     }
@@ -150,7 +117,7 @@ const CompaniesPage = () => {
           <Button variant="secondary" onClick={() => setIsConfirmModalOpen(false)}>Cancelar</Button>
           <Button 
             variant={companyToToggle?.status === 'Activo' ? 'danger' : 'success'} 
-            onClick={handleToggleStatus}
+            onClick={handleConfirmToggle}
           >
             Confirmar
           </Button>
