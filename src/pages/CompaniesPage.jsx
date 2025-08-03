@@ -5,6 +5,10 @@ import Table from '../components/common/Table.jsx';
 import Button from '../components/common/Button.jsx';
 import Modal from '../components/common/Modal.jsx';
 import CompanyForm from '../components/company/CompanyForm.jsx';
+import IconButton from '@mui/material/IconButton';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt'; 
 
 const CompaniesPage = () => {
   // Obtenemos los datos y las funciones directamente del contexto
@@ -52,17 +56,24 @@ const CompaniesPage = () => {
       header: 'CUIT',
       cell: (row) => <span className="whitespace-nowrap">{row.cuit}</span>
     },
-    { header: 'Email de Contacto', accessor: 'contactEmail' },
+    { header: 'Contacto', accessor: 'contactName' },
+    { header: 'Email', accessor: 'contactEmail' },
     {
       header: 'Acciones',
       cell: (row) => (
         <div className="flex space-x-2">
-          <Link to={`/companies/${row.id}`} state={{ company: row }}>
-            <Button variant="secondary" className="py-1 px-2 text-xs">Ver</Button>
+          <Link to={`/companies/${row.id}`} state={{ company: row }} title="Ver Empresa">
+            <IconButton size="small">
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
           </Link>
-          <Button variant="secondary" onClick={() => handleOpenEditModal(row)} className="py-1 px-2 text-xs">Editar</Button>
-          <Link to={`/companies/${row.id}/employees`} state={{ company: row }}>
-            <Button variant="info" className="py-1 px-2 text-xs">Nómina</Button>
+          <IconButton size="small" onClick={() => handleOpenEditModal(row)} title="Editar Empresa">
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <Link to={`/companies/${row.id}/employees`} state={{ company: row }} title="Ver Nómina">
+            <IconButton size="small">
+              <PeopleAltIcon fontSize="small" />
+            </IconButton>
           </Link>
         </div>
       ),
