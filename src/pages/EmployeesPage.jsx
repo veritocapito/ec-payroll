@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { useCompanies } from '../hooks/useCompanies.js';
 import Button from '../components/common/Button';
 import Table from '../components/common/Table';
 import Modal from '../components/common/Modal';
@@ -10,16 +11,18 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 
 const EmployeesPage = () => {
-  const location = useLocation();
   const { companyId } = useParams();
-  const company = location.state?.company;
+  // Obtenemos los datos y funciones directamente del contexto
+  const { companies, handleSaveEmployee } = useCompanies();
 
-  const [employees, setEmployees] = useState(company?.employees || []);
+  // Encontramos la empresa correcta usando el 'companyId' de la URL
+  const company = companies.find(c => c.id === parseInt(companyId));
+  // Derivamos la lista de empleados de la empresa encontrada
+  const employees = company?.employees || [];
+  
+  // El estado de los modales es local a la página
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
-
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [employeeToTerminate, setEmployeeToTerminate] = useState(null);
 
   const handleOpenAddModal = () => {
     setEditingEmployee(null);
@@ -31,33 +34,9 @@ const EmployeesPage = () => {
     setIsModalOpen(true);
   };
   
-  const handleSaveEmployee = (employeeData) => {
-    if (editingEmployee) {
-      setEmployees(prev => 
-        prev.map(emp => 
-          emp.id === editingEmployee.id ? { ...emp, ...employeeData } : emp
-        )
-      );
-    } else {
-      setEmployees(prev => [...prev, { ...employeeData, id: Date.now() }]);
-    }
-  };
-
-  const handleOpenConfirmModal = (employee) => {
-    setEmployeeToTerminate(employee);
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleConfirmTerminate = () => {
-    if (employeeToTerminate) {
-      setEmployees(prev =>
-        prev.map(emp =>
-          emp.id === employeeToTerminate.id ? { ...emp, status: 'Baja' } : emp
-        )
-      );
-      setIsConfirmModalOpen(false);
-      setEmployeeToTerminate(null);
-    }
+  // Esta función ahora solo necesita llamar a la función del contexto
+  const onSave = (employeeData) => {
+    handleSaveEmployee(company.id, employeeData);
   };
   
   if (!company) {
@@ -71,38 +50,24 @@ const EmployeesPage = () => {
       </div>
     );
   }
-
+  
   const employeeColumns = [
     { header: 'Legajo', accessor: 'legajo' },
     { header: 'Apellido', accessor: 'apellido' },
     { header: 'Nombres', accessor: 'nombres' },
-    { 
-      header: 'CUIL',
-      cell: (row) => <span className="whitespace-nowrap">{row.cuil}</span>
-    },
-    { header: 'Fecha de Ingreso', accessor: 'fechaIngreso' },
-    { header: 'Categoría', accessor: 'categoria' },
-    { 
-      header: 'Remuneración',
-      cell: (row) => (
-        <span className="whitespace-nowrap">
-          {`$ ${new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2 }).format(row.remuneracion || 0)}`}
-        </span>
-      )
-    },
+    { header: 'CUIL', cell: (row) => <span className="whitespace-nowrap">{row.cuil}</span> },
+    { header: 'Remuneración', cell: (row) => ( <span className="whitespace-nowrap">{`$ ${new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2 }).format(row.remuneracion || 0)}`}</span> ) },
     { 
       header: 'Acciones', 
       cell: (row) => (
         <div className="flex items-center">
           <Link to={`/companies/${companyId}/employees/${row.id}`} state={{ employee: row, company: company }} title="Ver Empleado">
-            <IconButton size="small">
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
+            <IconButton size="small"><VisibilityIcon fontSize="small" /></IconButton>
           </Link>
           <IconButton size="small" onClick={() => handleOpenEditModal(row)} title="Editar Empleado">
             <EditIcon fontSize="small" />
           </IconButton>
-          <IconButton size="small" onClick={() => handleOpenConfirmModal(row)} title="Registrar Baja">
+          <IconButton size="small" onClick={() => console.log('Registrar Baja:', row.id)} title="Registrar Baja">
             <ArchiveIcon fontSize="small" />
           </IconButton>
         </div>
@@ -127,30 +92,17 @@ const EmployeesPage = () => {
         <Table columns={employeeColumns} data={employees} />
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingEmployee ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}>
-        <EmployeeForm onClose={() => setIsModalOpen(false)} onSave={handleSaveEmployee} companyData={company} initialData={editingEmployee}/>
-      </Modal>
-
       <Modal
-        isOpen={isConfirmModalOpen}
-        onClose={() => setIsConfirmModalOpen(false)}
-        title="Confirmar Baja de Empleado"
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingEmployee ? 'Editar Empleado' : 'Agregar Nuevo Empleado'}
       >
-        <div className="font-serif">
-          <p>
-            ¿Estás seguro de que deseas registrar la baja del empleado 
-            <strong className="font-sans text-primary"> {employeeToTerminate?.nombres} {employeeToTerminate?.apellido}</strong>?
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            El estado del empleado cambiará a "Baja" y sus datos se conservarán.
-          </p>
-        </div>
-        <div className="flex justify-end space-x-4 mt-6">
-          <Button variant="secondary" onClick={() => setIsConfirmModalOpen(false)}>Cancelar</Button>
-          <Button variant="danger" onClick={handleConfirmTerminate}>
-            Confirmar Baja
-          </Button>
-        </div>
+        <EmployeeForm
+          onClose={() => setIsModalOpen(false)}
+          onSave={onSave}
+          companyData={company}
+          initialData={editingEmployee}
+        />
       </Modal>
     </div>
   );
